@@ -1,0 +1,14 @@
+[Unit]
+Description=Palworld Server
+After=network.target
+
+[Service]
+Type=simple
+User=palworld # change to your user
+MemoryMax=15G # limit memory usage by your machein
+Restart=on-failure
+RestartSec=30s
+ExecStart=/path/to/Steam/steamapps/common/PalServer/PalServer.sh -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS
+
+[Install]
+WantedBy=multi-user.target
