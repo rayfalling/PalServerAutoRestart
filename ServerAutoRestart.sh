@@ -29,23 +29,24 @@ MemoryUsed=$(free -m | awk '/^Mem:/{print $3}')
 
 # Get Buff/Cache Size
 BuffCache=$(free -m | awk '/^Mem:/{print $6}')
-# Get Total Swap 
+# Get Total Swap
 SwapTotle=$(free -m | awk '/^Swap:/{print $2}')
-# Get Total Memory 
+# Get Total Memory
 MemoryTotle=$(free -m | awk '/^Mem:/{print $2}')
 
 # Calculate Usage
 SwapUsage=$(echo "scale=2; $SwapUsed / $SwapTotle * 100" | bc)
 MemoryUsage=$(echo "scale=2; $MemoryUsed / $MemoryTotle * 100" | bc)
 
+Time=$(date "+%Y-%m-%d %H:%M:%S")
+
 # Print Memory Usage
-echo "Current Swqp Usage $SwapUsage %"
-echo "Current Memory Usage $MemoryUsage %"
+echo "[$Time] Current Swap Usage $SwapUsage%, Current Memory Usage $MemoryUsage%"
 
 # Clear Memory Cache
 if [ "$BuffCache" -ge "500" ]; then
     echo 3 > /proc/sys/vm/drop_caches
-    echo "Current Buff/Cache $BuffCache MB, Clean Buff/Cache..."
+    echo "[$Time] Current Buff/Cache $BuffCache MB, Clean Buff/Cache..."
 fi
 
 # If current usage reached threshold
@@ -55,22 +56,23 @@ MemoryOverThreshold=$(echo "$MemoryUsage > $MEMORY_THRESHOLD" | bc -l)
 # Check threshold And Restart Server
 if (( SwapOverThreshold )) && (( MemoryOverThreshold )); then
     # restarting...
-    echo "PalWorld Memory Over threshold! Restarting..."
+    echo "[$Time] PalWorld Memory Over threshold! Restarting..."
     MESSAGE_SHUTTING_DOWN="$MESSAGE_SHUTTING_DOWN_PRE $AUTO_RESTART_TIME $MESSAGE_SHUTTING_DOWN_POST"
 
     # Execute command through palworld server cron
-    $EXECUTE_COMMAND broadcast -m "$MESSAGE_BROADCAST"
-    $EXECUTE_COMMAND server shutdown -s "$AUTO_RESTART_TIME" -m "$MESSAGE_SHUTTING_DOWN"
+    $EXECUTE_COMMAND broadcast -m "$MESSAGE_BROADCAST" > /dev/null
+    $EXECUTE_COMMAND server shutdown -s "$AUTO_RESTART_TIME" -m "$MESSAGE_SHUTTING_DOWN" > /dev/null
 
     # sleep 1
     # broalcast message per seconds
     for ((CountDown = $AUTO_RESTART_TIME - 1; CountDown > 0; CountDown--))
     do
         MESSAGE_SHUTTING_DOWN="$MESSAGE_SHUTTING_DOWN_PRE $CountDown $MESSAGE_SHUTTING_DOWN_POST"
-        $EXECUTE_COMMAND broadcast -m "$MESSAGE_SHUTTING_DOWN"
+        $EXECUTE_COMMAND broadcast -m "$MESSAGE_SHUTTING_DOWN" > /dev/null
         sleep 1
     done
 
     # restart using systemd
     systemctl restart palserver.service
+    echo "[$Time] Server Restarted!"
 fi
