@@ -4,8 +4,8 @@
 # cron tool path
 # or other tool for palworld
 # address: https://github.com/zaigie/palworld-server-tool
-TOOL_PATH="/root/PalWorldServerMgr/pst-cli"
-CONF_PATH="/root/PalWorldServerMgr/config.yaml"
+TOOL_PATH="/path/to/pst-cli"     # You should change path to your own floader
+CONF_PATH="/path/to/config.yaml" # You should change path to your own floader
 
 # restart in seconds
 AUTO_RESTART_TIME=60
